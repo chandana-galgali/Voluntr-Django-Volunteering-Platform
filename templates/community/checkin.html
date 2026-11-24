@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<section class="wrap narrow section"><h1>Confirm attendance</h1><p>{{ event.title }}</p><form method="post" class="panel">{% csrf_token %}<button class="btn">Confirm check-in</button></form></section>{% endblock %}

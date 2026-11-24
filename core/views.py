@@ -13,6 +13,9 @@ from django.core.paginator import Paginator
 from uuid import uuid4
 from .models import *
 from .forms import *
+from community.models import Organization
+from community.services import verification, email_verified, application_changed, application_received, notify
+from django.urls import reverse
 def active(): return Opportunity.objects.filter(published=True).filter(Q(deadline__isnull=True)|Q(deadline__gte=timezone.localdate()))
 def profile(user): return Profile.objects.get_or_create(user=user)[0]
 def home(request): return render(request,'home.html',{'opportunities':active()[:3],'articles':Article.objects.filter(published=True)[:3],'categories':Opportunity.CATEGORIES})
@@ -28,13 +31,13 @@ def explore(request):
 def detail(request,slug):
     o=get_object_or_404(Opportunity,published=True,slug=slug)
     saved=request.user.is_authenticated and Bookmark.objects.filter(user=request.user,opportunity=o).exists()
-    return render(request,'detail.html',{'o':o,'saved':saved,'closed':not active().filter(pk=o.pk).exists()})
+    return render(request,'detail.html',{'o':o,'saved':saved,'closed':not active().filter(pk=o.pk).exists(),'org_profile':Organization.objects.filter(owner_id=o.owner_id,public=True).first() if o.owner_id else None})
 def signup(request):
     f=Signup(request.POST or None)
     if request.method=='POST' and f.is_valid():
         with transaction.atomic():
             u=f.save(); Profile.objects.create(user=u,role=f.cleaned_data['role'])
-        login(request,u); return redirect('profile')
+        login(request,u); verification(request,u); return redirect('profile')
     return render(request,'form.html',{'form':f,'title':'Join the community','action':'Create account'})
 def form_page(request,form,title,action,success):
     if request.method=='POST' and form.is_valid():
@@ -45,11 +48,15 @@ def edit_profile(request): return form_page(request,ProfileForm(request.POST or 
 @login_required
 def apply(request,slug):
     o=get_object_or_404(active(),slug=slug)
+    if request.method=='POST' and not (request.user.is_staff or email_verified(request.user)):
+        messages.error(request,'Verify your email on the dashboard first.'); return redirect('dashboard')
     if profile(request.user).role!='volunteer': return HttpResponseForbidden('Volunteer account required.')
     if Application.objects.filter(volunteer=request.user,opportunity=o).exists(): messages.info(request,'You already applied.'); return redirect('dashboard')
     f=ApplicationForm(request.POST or None)
     if request.method=='POST' and f.is_valid():
-        Application.objects.get_or_create(volunteer=request.user,opportunity=o,defaults={'motivation':f.cleaned_data['motivation']}); messages.success(request,'Application submitted.'); return redirect('dashboard')
+        a,created=Application.objects.get_or_create(volunteer=request.user,opportunity=o,defaults={'motivation':f.cleaned_data['motivation']})
+        if created: application_received(a)
+        messages.success(request,'Application submitted.'); return redirect('dashboard')
     return render(request,'form.html',{'form':f,'title':'Apply: '+o.title,'action':'Submit application'})
 @login_required
 @require_POST
@@ -71,11 +78,15 @@ def withdraw(request,pk):
         a=get_object_or_404(Application,pk=pk,volunteer=request.user)
         Opportunity.objects.select_for_update().get(pk=a.opportunity_id)
         a.refresh_from_db()
-        if a.status=='pending': a.status='withdrawn'; a.save(update_fields=['status'])
+        if a.status=='pending':
+            a.status='withdrawn'; a.save(update_fields=['status']); application_changed(a)
+            notify(a.opportunity.owner, 'Application withdrawn for '+a.opportunity.title, reverse('dashboard'))
     return redirect('dashboard')
 @login_required
 def publish(request):
     if profile(request.user).role!='organizer': return HttpResponseForbidden('Organizer account required.')
+    if request.method=='POST' and not (request.user.is_staff or email_verified(request.user)):
+        messages.error(request,'Verify your email on the dashboard first.'); return redirect('dashboard')
     f=OpportunityForm(request.POST or None)
     if request.method=='POST' and f.is_valid():
         o=f.save(commit=False); o.owner=request.user; o.image='img/'+{'Education': 'education', 'Community': 'community', 'Environment': 'environment', 'Animals': 'animals', 'Food security': 'food-security', 'Health': 'health', 'Sports': 'sports', 'Disaster relief': 'disaster-relief', 'Technology': 'technology'}.get(o.category,'community')+'.svg'; o.slug=slugify(o.title)[:100]+'-'+uuid4().hex[:8]; o.save(); messages.success(request,'Submitted for administrator review.'); return redirect('dashboard')
@@ -89,7 +100,8 @@ def review(request,pk):
         a.refresh_from_db(); status=request.POST.get('status')
         if a.status=='pending' and status in ['accepted','declined']:
             if status=='accepted' and o.applications.filter(status='accepted').count()>=o.slots: messages.error(request,'No slots remaining.')
-            else: a.status=status; a.save(update_fields=['status'])
+            else:
+                a.status=status; a.save(update_fields=['status']); application_changed(a)
     return redirect('dashboard')
 @login_required
 def log_hours(request,pk):
@@ -100,14 +112,21 @@ def log_hours(request,pk):
 @login_required
 @require_POST
 def approve_hours(request,pk):
-    h=get_object_or_404(Hours,pk=pk,application__opportunity__owner=request.user,application__status='accepted'); h.approved=True; h.save(update_fields=['approved']); return redirect('dashboard')
+    h=get_object_or_404(Hours,pk=pk,application__opportunity__owner=request.user,application__status='accepted')
+    if not h.approved:
+        h.approved=True; h.save(update_fields=['approved']); notify(h.application.volunteer,'Your volunteer hours were approved.',reverse('impact'))
+    return redirect('dashboard')
 def blog(request):
     qs=Article.objects.filter(published=True).order_by('-created')
     q=request.GET.get('q','').strip(); category=request.GET.get('category','')
     if q: qs=qs.filter(Q(title__icontains=q)|Q(summary__icontains=q)|Q(body__icontains=q))
     if category: qs=qs.filter(category=category)
     return render(request,'blog.html',{'articles':qs,'categories':Article.objects.filter(published=True).order_by('category').values_list('category',flat=True).distinct()})
-def article(request,slug): return render(request,'article.html',{'article':get_object_or_404(Article,published=True,slug=slug)})
+def article(request,slug):
+    article=get_object_or_404(Article,published=True,slug=slug)
+    related=list(Article.objects.filter(published=True,category=article.category).exclude(pk=article.pk).order_by('-created')[:3])
+    if len(related)<3: related+=list(Article.objects.filter(published=True).exclude(pk__in=[article.pk]+[a.pk for a in related]).order_by('-created')[:3-len(related)])
+    return render(request,'article.html',{'article':article,'related':related})
 def contact(request): return form_page(request,ContactForm(request.POST or None),'Get in touch','Send message','contact')
 @require_POST
 def subscribe(request):

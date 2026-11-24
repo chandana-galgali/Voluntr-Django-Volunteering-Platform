@@ -10,7 +10,7 @@ def photo_path(value):
         return 'img/hero.jpg'
     base = Path(settings.BASE_DIR) / 'static'
     p = Path(value)
-    for candidate in (value, str(p.with_suffix('.jpg')).replace('\\','/'), str(p.with_suffix('.svg')).replace('\\','/')):
+    for candidate in (str(p.with_suffix('.jpg')).replace('\\','/'), value, str(p.with_suffix('.svg')).replace('\\','/')):
         if (base / candidate).is_file():
             return candidate
     return 'img/hero.jpg'

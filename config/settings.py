@@ -37,3 +37,13 @@ EMAIL_HOST_USER=os.getenv('EMAIL_HOST_USER','')
 EMAIL_HOST_PASSWORD=os.getenv('EMAIL_HOST_PASSWORD','')
 EMAIL_USE_TLS=os.getenv('EMAIL_USE_TLS','1')=='1'
 DEFAULT_FROM_EMAIL=os.getenv('DEFAULT_FROM_EMAIL','Voluntr <no-reply@example.com>')
+
+INSTALLED_APPS += ['django.contrib.sitemaps', 'community']
+TEMPLATES[0]['OPTIONS']['context_processors'] += ['community.context.community']
+GOOGLE_CLIENT_ID=os.getenv('GOOGLE_CLIENT_ID','')
+GOOGLE_CLIENT_SECRET=os.getenv('GOOGLE_CLIENT_SECRET','')
+GOOGLE_REDIRECT_URI=os.getenv('GOOGLE_REDIRECT_URI','')
+PUBLIC_BASE_URL=os.getenv('PUBLIC_BASE_URL',('https://'+os.environ['RENDER_EXTERNAL_HOSTNAME']) if os.getenv('RENDER_EXTERNAL_HOSTNAME') else '')
+EMAIL_TIMEOUT=10
+
+MIDDLEWARE += ['community.middleware.PrivateResponseMiddleware']

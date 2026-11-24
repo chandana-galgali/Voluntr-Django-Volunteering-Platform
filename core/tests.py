@@ -4,8 +4,11 @@ from django.urls import reverse
 from .models import Opportunity,Profile,Application,Bookmark,Hours
 class WorkflowTests(TestCase):
     def setUp(self):
-        self.vol=User.objects.create_user('vol',password='Long-test-password-123')
-        self.org=User.objects.create_user('org',password='Long-test-password-123')
+        self.vol=User.objects.create_user('vol',email='vol@example.test',password='Long-test-password-123')
+        self.org=User.objects.create_user('org',email='org@example.test',password='Long-test-password-123')
+        from community.models import Account
+        Account.objects.create(user=self.vol,verified_email=self.vol.email)
+        Account.objects.create(user=self.org,verified_email=self.org.email)
         Profile.objects.create(user=self.vol); Profile.objects.create(user=self.org,role='organizer')
         self.o=Opportunity.objects.create(title='Beach cleanup',slug='beach',organization='Demo',category='Environment',city='Mumbai',summary='Cleanup',description='Help safely',commitment='2h',published=True,owner=self.org,slots=1)
     def test_public_pages(self):
