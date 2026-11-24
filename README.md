@@ -2,7 +2,7 @@
 
 A Django-powered community volunteering platform connecting people with meaningful opportunities and helping organizers coordinate contributions.
 
-**Live demo:** https://your-voluntr-app.onrender.com (deployment placeholder)
+**Live demo:** https://voluntr.onrender.com
 
 ## Interface previews
 
