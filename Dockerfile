@@ -1,34 +1,9 @@
-# Stage 1: Build the React application for production
-# We use a Node.js image to have access to npm and build tools.
-FROM node:18-alpine AS builder
-
-# Set the working directory inside the container
+FROM python:3.12-slim
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
-
-# Copy the package.json and package-lock.json files
-COPY ./package.json ./
-COPY ./package-lock.json ./
-
-# Install the dependencies
-RUN npm install
-
-# Copy the rest of the application source code
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-
-# Build the app for production
-# This command is specified in your package.json scripts
-RUN npm run build
-
-# Stage 2: Serve the production build with NGINX
-# We use a very lightweight NGINX image to serve the static files.
-FROM nginx:stable-alpine
-
-# Copy the built files from the 'builder' stage to NGINX's public directory
-# The 'build' directory is where 'npm run build' outputs the static files
-COPY --from=builder /app/build /usr/share/nginx/html
-
-# Expose port 80 to the outside world
-EXPOSE 80
-
-# The default NGINX command runs, which serves the content
-CMD ["nginx", "-g", "daemon off;"]
+RUN DEBUG=0 SECRET_KEY=build-only-not-used-at-runtime python manage.py collectstatic --noinput
+EXPOSE 8000
+CMD ["sh","-c","python manage.py makemigrations core && python manage.py migrate && python manage.py seed_demo && gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000}"]

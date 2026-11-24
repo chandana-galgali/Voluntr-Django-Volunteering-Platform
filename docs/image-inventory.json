@@ -1,0 +1,108 @@
+{
+  "photos": [
+    {
+      "path": "hero.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/tutoring-for-kids.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/environmental-cleanup.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/animal-shelter-support.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/food-bank-assistance.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/senior-citizens-tech-support.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/community-garden-crew.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/library-reading-circle.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/community-meal-prep.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "opportunities/adoption-event-support.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "journal/your-first-volunteer-day-a-practical-guide.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "journal/how-to-find-a-cause-that-fits-your-life.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "journal/the-art-of-showing-up-consistently.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "journal/a-better-cleanup-starts-with-planning.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    },
+    {
+      "path": "journal/designing-an-inclusive-volunteer-opportunity.jpg",
+      "width": 1672,
+      "height": 941,
+      "source": "AI-generated individual scene; not an actual event"
+    }
+  ],
+  "vector_art": [
+    "opportunities/elderly-assistance",
+    "opportunities/homeless-outreach",
+    "opportunities/mental-health-awareness",
+    "opportunities/youth-sports-coaching",
+    "opportunities/crisis-hotline-support",
+    "opportunities/public-health-campaign",
+    "opportunities/disaster-relief-assistance",
+    "opportunities/accessible-website-review",
+    "opportunities/storytelling-for-social-good",
+    "journal/remote-volunteering-that-makes-a-difference",
+    "journal/respectful-storytelling-in-community-work",
+    "journal/recording-volunteer-hours-with-integrity"
+  ]
+}

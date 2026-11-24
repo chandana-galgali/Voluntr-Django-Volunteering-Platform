@@ -1,48 +1,44 @@
-## Voluntr - Your Gateway to Community Service
+# Voluntr
 
-**Project Description**
+A Django-powered community volunteering platform connecting people with meaningful opportunities and helping organizers coordinate contributions.
 
-Voluntr is a web application that aims to simplify the process of finding and applying for local volunteer opportunities. The platform allows users to browse a variety of community service roles, from tutoring and environmental cleanup to animal shelter support and disaster relief assistance. Volunteers can easily submit their information and skills through a dedicated form to get matched with opportunities that fit their interests.
+**Live demo:** https://your-voluntr-app.onrender.com (deployment placeholder)
 
-**Features**
-- **Browse Opportunities**: View a list of diverse volunteer opportunities with icons and descriptions.
-- **Volunteer Form**: A simple and clean form for new volunteers to sign up and describe their skills.
-- **Responsive Design**: The website is designed to be accessible and easy to use on both desktop and mobile devices.
-- **API Endpoints**: The application includes a sitemap.xml and robots.txt for search engine optimization.
+## Interface previews
 
-**Technologies Used**
-- **Frontend**: React (with react-router-dom)
-- **Styling**: CSS with custom properties
-- **Icons**: react-icons
-- **Testing**: Jest, @testing-library/react, jest-axe, and Playwright for end-to-end testing
+Static design previews, not screenshots of a running Django server.
 
-**Getting Started**
-1. Clone the repository:
-```bash
-git clone https://github.com/chandana-galgali/voluntr-volunteer-match-website.git
-```
-2. Navigate to the project directory:
-```bash
-cd voluntr-volunteer-match-website
-```
-3. Install dependencies:
-```bash
-npm install
-```
-4. Run the development server:
-```bash
-npm start
-```
-Open your browser and visit http://localhost:3000 to see the application.
+[Homepage preview](docs/home-preview.html) · [Opportunity explorer preview](docs/explore-preview.html)
 
-**Scripts**
+## Features
 
-*npm start*: Runs the app in development mode.
+- Opportunity discovery, search, filters and pagination
+- Volunteer and organizer accounts with role-specific dashboards
+- Profile-based matching, bookmarks and application tracking
+- Moderated organizer submissions and application review
+- Volunteer hour submission and approval
+- Journal, contact and newsletter interest forms
+- Django administration and public read-only opportunities API
 
-*npm test*: Launches the test runner.
+## Stack
 
-*npm run build*: Builds the app for production.
+Django, Python, HTML, CSS, JavaScript, SQLite / PostgreSQL, Gunicorn and WhiteNoise.
 
-*npm run eject*: Ejects the app configuration.
+Demo listings are fictional examples. Photography consists of 15 independent AI-generated illustrative scenes (1672 × 941 pixels), not photographs of actual Voluntr events. Other listings and journal stories have individual scalable SVG editorial covers. No photo is cropped from a website mockup. The previews below are static interface previews, not live server screenshots.
 
-*npm run e2e*: Runs end-to-end tests with Playwright.
+## Visual previews
+
+![Homepage](docs/home-preview.png)
+
+![Explorer](docs/explore-preview.png)
+
+## Additional capabilities
+
+- Application activity overview and journal search by topic or keyword
+- Listing reports and administrator moderation queue
+- Printable contribution records based on approved volunteer hours
+- Organizer-only application CSV exports
+- Password recovery (SMTP configuration required for production email delivery)
+- Custom error pages and automatic demo data initialization on deployment
+
+![Journal](docs/journal-preview.png)
