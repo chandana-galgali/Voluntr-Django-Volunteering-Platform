@@ -7,6 +7,8 @@ class Profile(models.Model):
     skills=models.TextField(blank=True)
     interests=models.CharField(max_length=250,blank=True,help_text='Comma-separated causes')
     role=models.CharField(max_length=20,choices=[('volunteer','Volunteer'),('organizer','Organizer')],default='volunteer')
+    bio=models.TextField(max_length=1000,blank=True)
+    def interest_list(self): return [x.strip() for x in self.interests.split(',') if x.strip()]
 class Opportunity(models.Model):
     CATEGORIES=[(x,x) for x in ['Education','Environment','Animals','Food security','Community','Health','Disaster relief','Technology','Sports']]
     title=models.CharField(max_length=160)
@@ -24,6 +26,7 @@ class Opportunity(models.Model):
     deadline=models.DateField(null=True,blank=True)
     image=models.CharField(max_length=150,default='img/hero.jpg')
     published=models.BooleanField(default=False)
+    closed=models.BooleanField(default=False,help_text='Closed listings stay visible but no longer accept applications.')
     demo=models.BooleanField(default=False)
     created=models.DateTimeField(auto_now_add=True)
     class Meta: ordering=['-created']
@@ -32,7 +35,7 @@ class Application(models.Model):
     volunteer=models.ForeignKey(User,on_delete=models.CASCADE)
     opportunity=models.ForeignKey(Opportunity,on_delete=models.CASCADE,related_name='applications')
     motivation=models.TextField()
-    status=models.CharField(max_length=20,choices=[(s,s.title()) for s in ['pending','accepted','declined','withdrawn']],default='pending')
+    status=models.CharField(max_length=20,choices=[('pending','Pending'),('accepted','Accepted'),('declined','Rejected'),('withdrawn','Withdrawn')],default='pending')
     created=models.DateTimeField(auto_now_add=True)
     class Meta: constraints=[models.UniqueConstraint(fields=['volunteer','opportunity'],name='unique_application')]
 class Bookmark(models.Model):
@@ -45,6 +48,11 @@ class Hours(models.Model):
     hours=models.DecimalField(max_digits=4,decimal_places=1,validators=[MinValueValidator(0.5),MaxValueValidator(24)])
     note=models.CharField(max_length=250)
     approved=models.BooleanField(default=False)
+    rejected=models.BooleanField(default=False)
+    created=models.DateTimeField(auto_now_add=True,null=True)
+    class Meta: ordering=['-date','-id']
+    @property
+    def status(self): return 'Approved' if self.approved else 'Rejected' if self.rejected else 'Pending review'
 class Article(models.Model):
     title=models.CharField(max_length=180)
     slug=models.SlugField(unique=True)

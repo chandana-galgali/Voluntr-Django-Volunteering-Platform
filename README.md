@@ -38,7 +38,35 @@ Demo listings are fictional examples. Photography consists of 15 independent AI-
 - Listing reports and administrator moderation queue
 - Printable contribution records based on approved volunteer hours
 - Organizer-only application CSV exports
-- Password recovery (SMTP configuration required for production email delivery)
+- Password recovery and email verification (Brevo HTTPS API or SMTP)
 - Custom error pages and automatic demo data initialization on deployment
 
 ![Journal](docs/journal-preview.png)
+
+## Configuration (environment variables)
+
+| Variable | Purpose |
+| --- | --- |
+| `SECRET_KEY` | Required in production. |
+| `DEBUG` | `0` in production. |
+| `DATABASE_URL` | PostgreSQL connection string (Neon). |
+| `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS` | Extra hosts; the Render hostname is added automatically. |
+| `PUBLIC_BASE_URL` | e.g. `https://voluntr.onrender.com` — used for links in emails. |
+| `BREVO_API_KEY` | **Recommended.** Sends email through Brevo's HTTPS API (Render's free plan blocks SMTP ports). |
+| `DEFAULT_FROM_EMAIL` | e.g. `Voluntr <hello@yourdomain.com>` — must be a sender verified in Brevo. |
+| `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | SMTP fallback (only if `BREVO_API_KEY` is not set). |
+| `REQUIRE_EMAIL_VERIFICATION` | Default `1`. Set `0` to temporarily let unverified users apply/post/message. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Google sign-in. Redirect URI: `https://voluntr.onrender.com/community/google/callback/`. |
+
+## Running locally
+
+```bash
+python -m venv .venv && .venv\Scripts\activate   # Windows
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_demo          # sample listings, journal and organizations (add --refresh to overwrite edits)
+python manage.py runserver
+python manage.py test               # includes core/test_checklist.py, a walkthrough of the QA checklist
+```
+
+Event reminders: run `python manage.py send_event_reminders` hourly (e.g. a Render Cron Job).

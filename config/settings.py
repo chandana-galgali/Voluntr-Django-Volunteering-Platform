@@ -30,13 +30,23 @@ if not DEBUG:
 if DEBUG:
     STORAGES['staticfiles']={'BACKEND':'django.contrib.staticfiles.storage.StaticFilesStorage'}
 
-EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend' if os.getenv('EMAIL_HOST') else ('django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.dummy.EmailBackend')
+# Email delivery. Preferred in production: BREVO_API_KEY (HTTPS API, works on Render,
+# whose free instances block SMTP ports). Fallbacks: SMTP via EMAIL_HOST, then console (DEBUG).
+BREVO_API_KEY=os.getenv('BREVO_API_KEY','')
+if os.getenv('EMAIL_BACKEND'): EMAIL_BACKEND=os.environ['EMAIL_BACKEND']
+elif BREVO_API_KEY: EMAIL_BACKEND='community.email_backend.BrevoEmailBackend'
+elif os.getenv('EMAIL_HOST'): EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+else: EMAIL_BACKEND='django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.dummy.EmailBackend'
+EMAIL_CONFIGURED=bool(os.getenv('EMAIL_BACKEND') or BREVO_API_KEY or os.getenv('EMAIL_HOST') or DEBUG)
 EMAIL_HOST=os.getenv('EMAIL_HOST','')
 EMAIL_PORT=int(os.getenv('EMAIL_PORT','587'))
 EMAIL_HOST_USER=os.getenv('EMAIL_HOST_USER','')
 EMAIL_HOST_PASSWORD=os.getenv('EMAIL_HOST_PASSWORD','')
 EMAIL_USE_TLS=os.getenv('EMAIL_USE_TLS','1')=='1'
 DEFAULT_FROM_EMAIL=os.getenv('DEFAULT_FROM_EMAIL','Voluntr <no-reply@example.com>')
+SERVER_EMAIL=DEFAULT_FROM_EMAIL
+# Set REQUIRE_EMAIL_VERIFICATION=0 to temporarily allow unverified accounts to act (e.g. while email delivery is being set up).
+REQUIRE_EMAIL_VERIFICATION=os.getenv('REQUIRE_EMAIL_VERIFICATION','1')=='1'
 
 INSTALLED_APPS += ['django.contrib.sitemaps', 'community']
 TEMPLATES[0]['OPTIONS']['context_processors'] += ['community.context.community']
@@ -47,3 +57,7 @@ PUBLIC_BASE_URL=os.getenv('PUBLIC_BASE_URL',('https://'+os.environ['RENDER_EXTER
 EMAIL_TIMEOUT=10
 
 MIDDLEWARE += ['community.middleware.PrivateResponseMiddleware']
+# OpenStreetMap tiles require a Referer header; Django's default 'same-origin' policy strips it and the map tiles are blocked.
+SECURE_REFERRER_POLICY='strict-origin-when-cross-origin'
+LOGGING={'version':1,'disable_existing_loggers':False,'handlers':{'console':{'class':'logging.StreamHandler'}},'root':{'handlers':['console'],'level':'WARNING'}}
+
