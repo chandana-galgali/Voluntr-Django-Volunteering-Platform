@@ -55,6 +55,7 @@ Demo listings are fictional examples. Photography consists of 15 independent AI-
 | `BREVO_API_KEY` | **Recommended.** Sends email through Brevo's HTTPS API (Render's free plan blocks SMTP ports). |
 | `DEFAULT_FROM_EMAIL` | e.g. `Voluntr <hello@yourdomain.com>` — must be a sender verified in Brevo. |
 | `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | SMTP fallback (only if `BREVO_API_KEY` is not set). |
+| `SEED_DEMO_ON_MIGRATE` | Default `1`. Sample listings, journal stories and organizations are created automatically after `migrate` (create-only, never overwrites edits). Set `0` to disable. |
 | `REQUIRE_EMAIL_VERIFICATION` | Default `1`. Set `0` to temporarily let unverified users apply/post/message. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | Google sign-in. Redirect URI: `https://voluntr.onrender.com/community/google/callback/`. |
 

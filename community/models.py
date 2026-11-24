@@ -10,11 +10,14 @@ class Account(models.Model):
     verified_email = models.EmailField(blank=True)
     last_verification = models.DateTimeField(null=True, blank=True)
     google_subject = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    class Meta: verbose_name = 'email & sign-in record'
+    def __str__(self): return str(self.user)
 
 class LoginAttempt(models.Model):
     key = models.CharField(max_length=64, unique=True)
     count = models.PositiveIntegerField(default=0)
     until = models.DateTimeField(default=timezone.now)
+    class Meta: verbose_name = 'login rate-limit record'
 
 class Organization(models.Model):
     owner = models.OneToOneField(U, on_delete=models.CASCADE)
@@ -33,6 +36,8 @@ class Location(models.Model):
     latitude = models.FloatField(validators=[MinValueValidator(-90), MaxValueValidator(90)])
     longitude = models.FloatField(validators=[MinValueValidator(-180), MaxValueValidator(180)])
     approximate = models.BooleanField(default=True)
+    class Meta: verbose_name = 'map location'
+    def __str__(self): return f'{self.opportunity} @ {self.latitude:.3f}, {self.longitude:.3f}'
 
 class Event(models.Model):
     opportunity = models.ForeignKey('core.Opportunity', on_delete=models.CASCADE, related_name='events')
@@ -51,6 +56,7 @@ class Attendance(models.Model):
     checked_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         constraints = [models.UniqueConstraint(fields=['event','volunteer'], name='unique_event_attendance')]
+    def __str__(self): return f'{self.volunteer} @ {self.event}'
 
 class Notification(models.Model):
     user = models.ForeignKey(U, on_delete=models.CASCADE)
@@ -59,6 +65,7 @@ class Notification(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
     class Meta: ordering = ['-created']
+    def __str__(self): return self.text[:60]
 
 class Message(models.Model):
     application = models.ForeignKey('core.Application', on_delete=models.CASCADE, related_name='conversation_messages')
@@ -73,3 +80,4 @@ class Reminder(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     class Meta:
         constraints = [models.UniqueConstraint(fields=['event','user'], name='unique_event_reminder')]
+    def __str__(self): return f'Reminder: {self.event} → {self.user}'

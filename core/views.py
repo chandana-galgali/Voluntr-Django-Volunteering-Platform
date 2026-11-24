@@ -16,7 +16,7 @@ from .forms import *
 from community.models import Organization
 from community.services import verification, email_verified, can_act, application_changed, application_received, notify, display_name
 from community.auth import report as report_verification
-from community.models import Event, Attendance
+from community.models import Event, Attendance, Notification
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.urls import reverse
 def active(): return Opportunity.objects.filter(published=True,closed=False).filter(Q(deadline__isnull=True)|Q(deadline__gte=timezone.localdate()))
@@ -46,7 +46,7 @@ def signup(request):
         login(request,u,backend='django.contrib.auth.backends.ModelBackend')
         messages.success(request,f'Welcome to Voluntr, {display_name(u)}! Your account has been created.')
         report_verification(request,verification(request,u)); return redirect('profile')
-    return render(request,'form.html',{'form':f,'title':'Join the community','action':'Create account'})
+    return render(request,'signup.html',{'form':f})
 def form_page(request,form,title,action,success,message='Saved successfully.',intro=''):
     if request.method=='POST' and form.is_valid():
         form.save(); messages.success(request,message); return redirect(success)
@@ -99,7 +99,12 @@ def dashboard(request):
     upcoming=events.filter(cancelled=False,ends__gte=now).select_related('opportunity').order_by('starts')[:5]
     completed=[e for e in events.filter(ends__lt=now).select_related('opportunity').order_by('-starts')[:10]]
     for e in completed: e.attended=e.pk in attended
-    return render(request,'dashboard.html',{'p':p,'apps':apps.order_by('-created'),'saved':saved,'matches':matches,'total':Hours.objects.filter(application__volunteer=request.user,approved=True).aggregate(s=Sum('hours'))['s'] or 0,'owned':owned,'incoming':incoming,'incoming_pending':incoming.filter(status='pending').count(),'incoming_accepted':incoming.filter(status='accepted').count(),'org_hours':Hours.objects.filter(application__opportunity__owner=request.user,approved=True).aggregate(s=Sum('hours'))['s'] or 0,'logs':Hours.objects.filter(application__volunteer=request.user).select_related('application__opportunity'),'review_logs':Hours.objects.filter(application__opportunity__owner=request.user).select_related('application__volunteer','application__opportunity'),'upcoming':upcoming,'completed':completed,'organization':Organization.objects.filter(owner=request.user).first(),'display_name':display_name(request.user),'verified':email_verified(request.user)})
+    org=Organization.objects.filter(owner=request.user).first()
+    if p.role=='organizer':
+        steps=[('Verify your email',email_verified(request.user),'/dashboard/'),('Create your organization profile',bool(org),reverse('edit_organization')),('Make your organization public',bool(org and org.public),reverse('edit_organization')),('Post your first opportunity',Opportunity.objects.filter(owner=request.user).exists(),reverse('publish'))]
+    else:
+        steps=[('Verify your email',email_verified(request.user),'/dashboard/'),('Add your name',bool(request.user.get_full_name()),reverse('profile')),('Choose causes you care about',bool(p.interests),reverse('profile')),('Add your city and skills',bool(p.city and p.skills),reverse('profile')),('Apply to an opportunity',apps.exists(),reverse('explore'))]
+    return render(request,'dashboard.html',{'p':p,'apps':apps.order_by('-created'),'saved':saved,'matches':matches,'total':Hours.objects.filter(application__volunteer=request.user,approved=True).aggregate(s=Sum('hours'))['s'] or 0,'owned':owned,'incoming':incoming,'incoming_pending':incoming.filter(status='pending').count(),'incoming_accepted':incoming.filter(status='accepted').count(),'org_hours':Hours.objects.filter(application__opportunity__owner=request.user,approved=True).aggregate(s=Sum('hours'))['s'] or 0,'logs':Hours.objects.filter(application__volunteer=request.user).select_related('application__opportunity'),'review_logs':Hours.objects.filter(application__opportunity__owner=request.user).select_related('application__volunteer','application__opportunity'),'upcoming':upcoming,'completed':completed,'organization':Organization.objects.filter(owner=request.user).first(),'display_name':display_name(request.user),'verified':email_verified(request.user),'steps':steps,'steps_done':sum(1 for _,d,_ in steps if d),'recent_notes':Notification.objects.filter(user=request.user)[:4],'pending_hours':Hours.objects.filter(application__opportunity__owner=request.user,approved=False,rejected=False).count()})
 @login_required
 @require_POST
 def withdraw(request,pk):

@@ -31,10 +31,25 @@ def organizations(request):
     if q: qs=qs.filter(Q(name__icontains=q)|Q(bio__icontains=q))
     if city: qs=qs.filter(city__iexact=city)
     cities=Organization.objects.filter(public=True).order_by('city').values_list('city',flat=True).distinct()
-    return render(request,'community/organizations.html',{'organizations':qs,'cities':cities})
+    orgs=attach_covers(list(qs))
+    return render(request,'community/organizations.html',{'organizations':orgs,'cities':cities})
+
+def attach_covers(orgs):
+    """Give each organization a cover photo and cause list taken from its published listings."""
+    from core.templatetags.visuals import photo_path
+    by_owner={}
+    for o in Opportunity.objects.filter(owner_id__in=[x.owner_id for x in orgs],published=True).order_by('created').only('owner_id','image','category'):
+        entry=by_owner.setdefault(o.owner_id,{'image':None,'causes':[]})
+        if not entry['image'] and photo_path(o.image).endswith('.jpg'): entry['image']=photo_path(o.image)
+        if o.category not in entry['causes']: entry['causes'].append(o.category)
+    for org in orgs:
+        entry=by_owner.get(org.owner_id,{})
+        org.cover=entry.get('image') or 'img/hero.jpg'; org.causes=entry.get('causes',[])
+        org.is_sample='(Sample)' in org.name
+    return orgs
 
 def organization(request,slug):
-    org=get_object_or_404(Organization,slug=slug,public=True)
+    org=attach_covers([get_object_or_404(Organization,slug=slug,public=True)])[0]
     return render(request,'community/organization.html',{'org':org,'listings':Opportunity.objects.filter(owner=org.owner,published=True).filter(Q(deadline__isnull=True)|Q(deadline__gte=timezone.localdate()))})
 
 @login_required

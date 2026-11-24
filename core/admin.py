@@ -6,7 +6,11 @@ admin.site.site_title = 'Voluntr admin'
 
 @admin.register(Opportunity)
 class OpportunityAdmin(admin.ModelAdmin):
-    list_display=('title','organization','owner','category','city','published','closed','demo','created'); list_filter=('published','closed','category','demo'); search_fields=('title','organization','city','owner__username'); prepopulated_fields={'slug':('title',)}; actions=['publish_selected','unpublish_selected']; list_editable=('published',)
+    list_display=('title','organization','owner_name','category','city','published','closed','demo','created'); list_filter=('published','closed','category','demo'); search_fields=('title','organization','city','owner__username'); prepopulated_fields={'slug':('title',)}; actions=['publish_selected','unpublish_selected']; list_editable=('published',)
+    @admin.display(description='Owner',ordering='owner__username')
+    def owner_name(self,o):
+        if not o.owner: return '—'
+        return 'Sample account' if not o.owner.is_active else (o.owner.get_full_name() or o.owner.username)
     @admin.action(description='Approve & publish selected opportunities')
     def publish_selected(self,request,queryset):
         from community.services import notify

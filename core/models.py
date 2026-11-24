@@ -7,6 +7,7 @@ class Profile(models.Model):
     skills=models.TextField(blank=True)
     interests=models.CharField(max_length=250,blank=True,help_text='Comma-separated causes')
     role=models.CharField(max_length=20,choices=[('volunteer','Volunteer'),('organizer','Organizer')],default='volunteer')
+    def __str__(self): return f'{self.user} ({self.role})'
     bio=models.TextField(max_length=1000,blank=True)
     def interest_list(self): return [x.strip() for x in self.interests.split(',') if x.strip()]
 class Opportunity(models.Model):
@@ -29,7 +30,7 @@ class Opportunity(models.Model):
     closed=models.BooleanField(default=False,help_text='Closed listings stay visible but no longer accept applications.')
     demo=models.BooleanField(default=False)
     created=models.DateTimeField(auto_now_add=True)
-    class Meta: ordering=['-created']
+    class Meta: ordering=['-created']; verbose_name_plural='opportunities'
     def __str__(self): return self.title
 class Application(models.Model):
     volunteer=models.ForeignKey(User,on_delete=models.CASCADE)
@@ -37,11 +38,13 @@ class Application(models.Model):
     motivation=models.TextField()
     status=models.CharField(max_length=20,choices=[('pending','Pending'),('accepted','Accepted'),('declined','Rejected'),('withdrawn','Withdrawn')],default='pending')
     created=models.DateTimeField(auto_now_add=True)
-    class Meta: constraints=[models.UniqueConstraint(fields=['volunteer','opportunity'],name='unique_application')]
+    class Meta: constraints=[models.UniqueConstraint(fields=['volunteer','opportunity'],name='unique_application')]; ordering=['-created']
+    def __str__(self): return f'{self.volunteer} → {self.opportunity}'
 class Bookmark(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     opportunity=models.ForeignKey(Opportunity,on_delete=models.CASCADE)
     class Meta: constraints=[models.UniqueConstraint(fields=['user','opportunity'],name='unique_bookmark')]
+    def __str__(self): return f'{self.user} ★ {self.opportunity}'
 class Hours(models.Model):
     application=models.ForeignKey(Application,on_delete=models.CASCADE)
     date=models.DateField()
@@ -50,7 +53,7 @@ class Hours(models.Model):
     approved=models.BooleanField(default=False)
     rejected=models.BooleanField(default=False)
     created=models.DateTimeField(auto_now_add=True,null=True)
-    class Meta: ordering=['-date','-id']
+    class Meta: ordering=['-date','-id']; verbose_name='hours submission'; verbose_name_plural='volunteer hours'
     @property
     def status(self): return 'Approved' if self.approved else 'Rejected' if self.rejected else 'Pending review'
 class Article(models.Model):
@@ -64,11 +67,15 @@ class Article(models.Model):
     published=models.BooleanField(default=True)
     def __str__(self): return self.title
 class Contact(models.Model):
+    class Meta: ordering=['-created']; verbose_name='contact message'
+    def __str__(self): return f'{self.name} <{self.email}>'
     name=models.CharField(max_length=100)
     email=models.EmailField()
     message=models.TextField()
     created=models.DateTimeField(auto_now_add=True)
 class Subscriber(models.Model):
+    class Meta: ordering=['-created']; verbose_name='newsletter subscriber'
+    def __str__(self): return self.email
     email=models.EmailField(unique=True)
     created=models.DateTimeField(auto_now_add=True)
 
@@ -78,3 +85,5 @@ class ListingReport(models.Model):
     reason=models.TextField(max_length=2000)
     resolved=models.BooleanField(default=False)
     created=models.DateTimeField(auto_now_add=True)
+    class Meta: ordering=['resolved','-created']
+    def __str__(self): return f'Report on {self.opportunity}'

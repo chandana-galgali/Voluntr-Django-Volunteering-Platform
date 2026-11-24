@@ -1,0 +1,11 @@
+{% extends "admin/index.html" %}{% load admin_dashboard %}
+{% block content_title %}<h1>Welcome back{% if user.first_name %}, {{ user.first_name }}{% endif %}</h1>{% voluntr_admin_stats as s %}
+<div class="v-dash">
+<div class="v-cards">{% for c in s.cards %}<a class="v-card" href="{{ c.url }}"><span class="v-label">{{ c.label }}</span><span class="v-value">{{ c.value }}</span><span class="v-sub">{{ c.sub }}</span></a>{% endfor %}</div>
+<div class="v-row">
+<section class="v-panel"><h2>Needs attention</h2><div class="v-queue">{% for q in s.queue %}<a class="v-q {% if q.value and q.tone %}v-{{ q.tone }}{% endif %}" href="{{ q.url }}"><span>{{ q.label }}</span><b>{{ q.value }}</b></a>{% endfor %}</div></section>
+<section class="v-panel"><h2>Moderation queue</h2>{% if s.pending %}<table class="v-table"><tbody>{% for o in s.pending %}<tr><td><a href="{% url 'admin:core_opportunity_change' o.pk %}"><strong>{{ o.title }}</strong></a><div class="v-muted">{{ o.organization }} · {{ o.city }} · by {{ o.owner|default:'—' }}</div></td><td class="v-right v-muted">{{ o.created|timesince }} ago</td></tr>{% endfor %}</tbody></table><p class="v-hint">Tick listings in <a href="{% url 'admin:core_opportunity_changelist' %}?published__exact=0">Opportunities</a> and choose “Approve &amp; publish”.</p>{% else %}<p class="v-empty">✓ Nothing waiting for approval.</p>{% endif %}
+{% if s.reports %}<h3 class="v-h3">Open reports</h3><table class="v-table"><tbody>{% for r in s.reports %}<tr><td><a href="{% url 'admin:core_listingreport_change' r.pk %}">{{ r.opportunity.title }}</a><div class="v-muted">{{ r.reason|truncatechars:80 }}</div></td><td class="v-right v-muted">{{ r.created|timesince }} ago</td></tr>{% endfor %}</tbody></table>{% endif %}</section>
+</div>
+<h2 class="v-section">Manage data</h2>
+</div>{% endblock %}

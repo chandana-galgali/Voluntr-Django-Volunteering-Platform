@@ -18,9 +18,13 @@ class Signup(UserCreationForm):
     email=forms.EmailField()
     role=forms.ChoiceField(choices=Profile._meta.get_field('role').choices,label='I want to',widget=forms.RadioSelect,initial='volunteer')
     class Meta(UserCreationForm.Meta): fields=['username','first_name','last_name','email']
+    field_order=['role','first_name','last_name','username','email','password1','password2']
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
-        self.fields['role'].choices=[('volunteer','Volunteer — find and join opportunities'),('organizer','Organizer — post opportunities for my organization')]
+        self.fields['username'].help_text='Letters, numbers and @ . + - _ only.'
+        self.fields['password2'].label='Confirm password'; self.fields['password2'].help_text=''
+        self.fields['email'].widget.attrs.update(autocomplete='email')
+        self.fields['role'].choices=[('volunteer','Volunteer — Find causes, apply and log your hours'),('organizer','Organizer — Post opportunities and manage volunteers')]
     def clean_first_name(self): return clean_person_name(self.cleaned_data.get('first_name'),'First name')
     def clean_last_name(self): return clean_person_name(self.cleaned_data.get('last_name'),'Last name')
     def clean_email(self):

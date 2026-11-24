@@ -62,7 +62,7 @@ class ChecklistTests(TestCase):
 
     def test_03_login(self):
         r = self.client.post(reverse('login'), {'username': 'vol', 'password': PW}); self.assertRedirects(r, reverse('dashboard'), fetch_redirect_response=False)
-        self.assertContains(self.client.get(reverse('dashboard')), 'Hello, Asha Rao.')
+        self.assertContains(self.client.get(reverse('dashboard')), 'Hello, Asha Rao')
         self.client.post(reverse('logout')); self.assertEqual(self.client.get(reverse('dashboard')).status_code, 302)
         r = self.client.post(reverse('login'), {'username': 'vol', 'password': 'nope'}); self.assertContains(r, 'did not match')
         for _ in range(4): self.client.post(reverse('login'), {'username': 'vol', 'password': 'nope'})
@@ -91,7 +91,7 @@ class ChecklistTests(TestCase):
         self.assertRedirects(run(), reverse('dashboard'), fetch_redirect_response=False)
         u = User.objects.get(email='priya.sharma@gmail.com')
         self.assertFalse(u.username.startswith('google_')); self.assertEqual(u.get_full_name(), 'Priya Sharma')
-        self.assertContains(self.client.get(reverse('dashboard')), 'Hello, Priya Sharma.')
+        self.assertContains(self.client.get(reverse('dashboard')), 'Hello, Priya Sharma')
         self.client.post(reverse('logout')); run(); self.assertEqual(User.objects.filter(email='priya.sharma@gmail.com').count(), 1)
         self.client.post(reverse('logout'))
         self.client.get(reverse('google_start')); s = self.client.session['google_oauth']
@@ -131,7 +131,7 @@ class ChecklistTests(TestCase):
         self.assertRedirects(r, reverse('dashboard'), fetch_redirect_response=False)
         p = Profile.objects.get(user=self.vol); self.assertEqual((p.city, p.interests, p.skills, p.bio), ('Pune', 'Education,Environment', 'teaching, first aid', 'I like helping'))
         self.client.logout(); self.client.login(username='vol', password=PW)
-        self.assertContains(self.client.get(reverse('dashboard')), 'Hello, Asha Kulkarni.')
+        self.assertContains(self.client.get(reverse('dashboard')), 'Hello, Asha Kulkarni')
         self.assertContains(self.client.get(reverse('profile')), 'checked')
         r = self.client.post(reverse('profile'), {'first_name': 'A1!', 'city': '123', 'skills': 'x' * 70}); self.assertEqual(r.status_code, 200)
         self.assertEqual(set(r.context['form'].errors), {'first_name', 'city', 'skills'})
@@ -194,7 +194,7 @@ class ChecklistTests(TestCase):
         self.assertTrue(self.client.post(reverse('publish'), {}).context['form'].errors)
         data = {'title': 'Beach Day', 'organization': 'Org', 'category': 'Environment', 'city': 'Mumbai', 'mode': 'On-site', 'summary': 'Sum', 'description': 'Desc', 'skills': '', 'commitment': '2h', 'slots': 3}
         self.client.post(reverse('publish'), data); o = Opportunity.objects.get(title='Beach Day')
-        self.assertFalse(o.published); self.assertContains(self.client.get(reverse('dashboard')), 'Awaiting moderation')
+        self.assertFalse(o.published); self.assertContains(self.client.get(reverse('dashboard')), 'Awaiting approval')
         self.assertEqual(self.client.get(reverse('detail', args=[o.slug])).status_code, 404)
         self.client.post(reverse('edit_opportunity', args=[o.slug]), dict(data, title='Beach Day Updated')); o.refresh_from_db(); self.assertEqual(o.title, 'Beach Day Updated')
         o.published = True; o.save(); self.assertEqual(self.client.get(reverse('detail', args=[o.slug])).status_code, 200)
@@ -236,7 +236,7 @@ class ChecklistTests(TestCase):
         start = timezone.localtime() + timedelta(minutes=10)
         self.client.post(reverse('create_event', args=['river']), {'title': 'Cleanup', 'starts': start.strftime('%Y-%m-%dT%H:%M'), 'ends': (start + timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M'), 'venue': 'Ghat 3'})
         e = Event.objects.get(); self.assertTrue(Notification.objects.filter(user=self.vol, text__startswith='New event').exists())
-        self.assertContains(self.client.get(reverse('event_detail', args=[e.pk])), 'Attendance QR')
+        self.assertContains(self.client.get(reverse('event_detail', args=[e.pk])), 'Check-in QR code')
         try:
             import PIL.Image  # noqa
             self.assertEqual(self.client.get(reverse('event_qr', args=[e.pk]))['Content-Type'], 'image/png')
@@ -262,7 +262,7 @@ class ChecklistTests(TestCase):
         self.client.post(reverse('approve_hours', args=[h3.pk])); self.client.post(reverse('reject_hours', args=[h5.pk]))
         self.client.force_login(self.vol)
         self.assertEqual(self.client.get(reverse('dashboard')).context['total'], 3)
-        imp = self.client.get(reverse('impact')); self.assertEqual(imp.context['total'], 3); self.assertContains(imp, '★ Earned')
+        imp = self.client.get(reverse('impact')); self.assertEqual(imp.context['total'], 3); self.assertContains(imp, 'badge-card earned')
         cert = self.client.get(reverse('certificate', args=[a.pk])); self.assertContains(cert, 'Asha Rao'); self.assertContains(cert, '3 approved volunteer hours'); self.assertContains(cert, 'window.print')
         self.client.force_login(self.vol2); self.assertEqual(self.client.get(reverse('certificate', args=[a.pk])).status_code, 404)
         self.client.force_login(self.org); self.assertContains(self.client.get(reverse('impact')), 'Organization analytics')
@@ -274,7 +274,7 @@ class ChecklistTests(TestCase):
         u = self.make('blank'); self.client.force_login(u)
         for name in ['dashboard', 'impact', 'calendar', 'inbox', 'notifications', 'activity', 'profile']:
             self.assertEqual(self.client.get(reverse(name)).status_code, 200, name)
-        self.assertNotContains(self.client.get(reverse('impact')), '★ Earned')
+        self.assertNotContains(self.client.get(reverse('impact')), 'badge-card earned')
 
     def test_18_messaging(self):
         a = Application.objects.create(volunteer=self.vol, opportunity=self.o, motivation='m' * 25)
