@@ -15,6 +15,10 @@ A full-stack community volunteering platform built with Django — connecting vo
 ![Leaflet](https://img.shields.io/badge/Maps-Leaflet%20%2B%20OSM-199900?logo=leaflet&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8)
 
+<br>
+
+<img src="docs/screenshots/home.jpg" alt="Voluntr homepage" width="100%">
+
 </div>
 
 ---
@@ -22,6 +26,7 @@ A full-stack community volunteering platform built with Django — connecting vo
 ## Table of contents
 
 - [Overview](#overview)
+- [Screenshots](#screenshots)
 - [Features](#features)
   - [For volunteers](#for-volunteers)
   - [For organizers](#for-organizers)
@@ -48,6 +53,41 @@ Many people want to help but struggle to find a role that fits their skills, loc
 - **Volunteers** discover opportunities by cause, city and format, apply in a click, message organizers, check in at events with a QR code, log hours and earn certificates and badges.
 - **Organizers** publish listings (reviewed by an administrator), manage applicants, schedule events, approve hours and export records.
 - **Administrators** moderate listings, verify organizations and review reports from a branded admin dashboard.
+
+## Screenshots
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/explore.jpg" alt="Opportunity search with filters"><br><sub><b>Find opportunities</b> — search, filters and cause-based browsing</sub></td>
+<td width="50%"><img src="docs/screenshots/opportunity.jpg" alt="Opportunity details page"><br><sub><b>Opportunity details</b> — key facts, apply, save, share and report</sub></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/volunteer-dashboard.jpg" alt="Volunteer dashboard"><br><sub><b>Volunteer dashboard</b> — applications, hours, upcoming activities and updates</sub></td>
+<td><img src="docs/screenshots/organizer-dashboard.jpg" alt="Organizer dashboard"><br><sub><b>Organizer dashboard</b> — listings, applicant review and hours approval</sub></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/organizations.jpg" alt="Organizations directory"><br><sub><b>Organizations directory</b> — search, city filter and verification badges</sub></td>
+<td><img src="docs/screenshots/organization.jpg" alt="Organization profile"><br><sub><b>Organization profile</b> — about, at-a-glance facts and open opportunities</sub></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/event-qr.jpg" alt="Event page with check-in QR code"><br><sub><b>Events & QR check-in</b> — printable attendance code and live check-ins</sub></td>
+<td><img src="docs/screenshots/calendar.jpg" alt="Activity calendar"><br><sub><b>Activity calendar</b> — monthly view with event navigation</sub></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/impact.jpg" alt="Impact analytics and badges"><br><sub><b>Impact & badges</b> — hours by cause and achievement progress</sub></td>
+<td><img src="docs/screenshots/messages.jpg" alt="Messaging"><br><sub><b>Messaging</b> — private chat between volunteer and organizer</sub></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/signup.jpg" alt="Sign up page"><br><sub><b>Sign up</b> — role selection and Google sign-in</sub></td>
+<td><img src="docs/screenshots/admin.jpg" alt="Admin dashboard"><br><sub><b>Admin dashboard</b> — stats, moderation queue and items needing attention</sub></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/dark-mode.jpg" alt="Dark mode"><br><sub><b>Dark mode</b> — full theme across every page</sub></td>
+<td><img src="docs/screenshots/mobile.jpg" alt="Mobile views"><br><sub><b>Mobile</b> — responsive layouts for phones and tablets</sub></td>
+</tr>
+</table>
+
+> Screenshots use the bundled sample content and fictional test accounts.
 
 ---
 
